@@ -1,5 +1,5 @@
 <template>
-    <div id="Repos" v-if="repos.length > 0" >
+    <div id="Repos" v-if="repos.length > 0">
         <div id="repo_date_filter">
             <!-- 2008-02-08 is Github creation date  -->
             <input 
@@ -7,8 +7,12 @@
                 v-model="date" 
                 min="2008-02-08" 
                 :max="today"
-                v-on:change=update()
+                v-on:keydown=removeDateError()
+                v-on:keyup.enter=update()
                  />
+                <button class="update" v-on:click=update()>search</button>
+                <br>
+                <span class="error" v-if="this.invalidDateError">Please enter a valid date</span>
         </div>
         <div id="repos_container">
             <Repo 
@@ -41,7 +45,7 @@ export default {
     data(){
         return {
             source: 'https://api.github.com/search/repositories?q=created:>',
-            apiURl: 'https://api.github.com/search/repositories?q=created:>',
+            apiURl: '',
             today: this.getTodayDate(),
             date: this.getPastMonth(),
             sort: '&sort=stars',
@@ -50,12 +54,13 @@ export default {
             page: 1,
             repos: [],
             busy: false,
-            showLoading: false
+            showLoading: false,
+            invalidDateError: false
         }
     },
     mounted(){
         let self = this; // in order to use 'this' inside window;
-        this.apiURl += this.date + this.sort + this.order + this.perPage;
+        this.apiURl = this.source + this.date + this.sort + this.order + this.perPage;
         this.fetch();
         window.onscroll = function() {
         if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight && !self.busy) {
@@ -74,9 +79,16 @@ export default {
             });
         },
         update(){
-            //changing date and fetching again
+            let time = new Date(this.date).getTime();
+            if (isNaN(time) || time < 0) { 
+                this.invalidDateError = true;
+                return;
+            }
             this.apiURl = this.source + this.date +  this.sort + this.order + this.perPage;
             this.fetch();
+        },
+        removeDateError(){
+            this.invalidDateError = false;
         },
         loadMore() {
             this.busy = true;
@@ -127,6 +139,16 @@ export default {
     padding: 5px;
     border-radius: 3px;
     border-width: 0;
+    font-size: 12px;
+}
+.update{
+    padding: 5px 20px;
+    border-radius: 3px;
+    font-size: 12px;
+    margin-left: 12px;
+}
+.error {
+    color:red;
     font-size: 12px;
 }
 </style>
