@@ -25,6 +25,7 @@
                 :created_at="repo.created_at"
                  />
         </div>
+        <img v-if="showLoading" src="../../assets/spinner.gif" alt="loading-spinner">
     </div>
 </template>
 
@@ -45,12 +46,22 @@ export default {
             date: this.getPastMonth(),
             sort: '&sort=stars',
             order: '&order=desc',
+            perPage: '&per_page=100', // In order to get 100 results per page
+            page: 1,
             repos: [],
+            busy: false,
+            showLoading: false
         }
     },
     mounted(){
-        this.apiURl += this.date + this.sort + this.order;
+        let self = this; // in order to use 'this' inside window;
+        this.apiURl += this.date + this.sort + this.order + this.perPage;
         this.fetch();
+        window.onscroll = function() {
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight && !self.busy) {
+                self.loadMore();
+            }
+        };
     },
     methods: {
         fetch(){
@@ -60,8 +71,19 @@ export default {
         },
         update(){
             //changing date and fetching again
-            this.apiURl = this.source + this.date +  this.sort + this.order;
+            this.apiURl = this.source + this.date +  this.sort + this.order + this.perPage;
             this.fetch();
+        },
+        loadMore() {
+            this.busy = true;
+            this.page++;
+            this.showLoading = true;
+            axios.get(this.apiURl + '&page=' + this.page + this.perPage).then(res => {
+                const append = res.data.items
+                this.repos = this.repos.concat(append);
+                this.busy = false;
+                this.showLoading = false;
+            });
         },
         getTodayDate: function(){
             return this.formateDate(new Date());
