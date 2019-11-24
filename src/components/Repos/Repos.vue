@@ -1,5 +1,5 @@
 <template>
-    <div id="Repos" >
+    <div id="Repos" v-if="repos.length > 0" >
         <div id="repo_date_filter">
             <!-- 2008-02-08 is Github creation date  -->
             <input 
@@ -65,8 +65,12 @@ export default {
     },
     methods: {
         fetch(){
+            this.repos = [];
+            this.emitFetching();
             axios.get(this.apiURl).then(res => {
                 this.repos = res.data.items;
+                this.showLoading = false;
+                this.emitLoaded();
             });
         },
         update(){
@@ -84,6 +88,12 @@ export default {
                 this.busy = false;
                 this.showLoading = false;
             });
+        },
+        emitFetching(){
+            this.$emit('fetching')
+        },
+        emitLoaded(){
+            this.$emit('loaded');
         },
         getTodayDate: function(){
             return this.formateDate(new Date());

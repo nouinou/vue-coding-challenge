@@ -1,6 +1,7 @@
 <template>
   <div id="app">
-    <Repos />
+    <img id="startup_loader" v-if="loading" src="./assets/spinner.gif" alt="loading-spinner">
+    <Repos @loaded="hideLoading" @fetching="showLoading"/>
   </div>
 </template>
 
@@ -9,8 +10,21 @@ import Repos from './components/Repos/Repos.vue'
 
 export default {
   name: 'app',
+  data(){
+    return {
+      loading: true
+    }
+  },
   components: {
     Repos
+  },
+  methods:{
+    hideLoading: function() {
+      this.loading = false
+    },
+    showLoading: function() {
+      this.loading = true
+    }
   }
 }
 </script>
