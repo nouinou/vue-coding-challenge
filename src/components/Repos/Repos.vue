@@ -120,3 +120,13 @@ export default {
     }
 }
 </script>
+
+
+<style>
+#repo_date_filter input{
+    padding: 5px;
+    border-radius: 3px;
+    border-width: 0;
+    font-size: 12px;
+}
+</style>
